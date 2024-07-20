@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        td {
+            border: 1px solid #000;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            font-size: 20px;
+        }
+        input {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            font-size: 20px;
+            border: none;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <table id="sudoku-grid">
+        <!-- Sudoku grid will be generated here by JavaScript -->
+    </table>
+    <button onclick="solveSudoku()">Solve Sudoku</button>
+
+    <script>
+        const grid = [
+            [5, 3, 0, 0, 7, 0, 0, 0, 0],
+            [6, 0, 0, 1, 9, 5, 0, 0, 0],
+            [0, 9, 8, 0, 0, 0, 0, 6, 0],
+            [8, 0, 0, 0, 6, 0, 0, 0, 3],
+            [4, 0, 0, 8, 0, 3, 0, 0, 1],
+            [7, 0, 0, 0, 2, 0, 0, 0, 6],
+            [0, 6, 0, 0, 0, 0, 2, 8, 0],
+            [0, 0, 0, 4, 1, 9, 0, 0, 5],
+            [0, 0, 0, 0, 8, 0, 0, 7, 9]
+        ];
+
+        function createGrid() {
+            const table = document.getElementById('sudoku-grid');
+            for (let row = 0; row < 9; row++) {
+                const tr = document.createElement('tr');
+                for (let col = 0; col < 9; col++) {
+                    const td = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.maxLength = 1;
+                    if (grid[row][col] !== 0) {
+                        input.value = grid[row][col];
+                        input.disabled = true;
+                    }
+                    td.appendChild(input);
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+        }
+
+        function solveSudoku() {
+            const inputs = document.querySelectorAll('input');
+            const currentGrid = [];
+            for (let i = 0; i < 9; i++) {
+                currentGrid[i] = [];
+                for (let j = 0; j < 9; j++) {
+                    const value = inputs[i * 9 + j].value;
+                    currentGrid[i].push(value ? parseInt(value) : 0);
+                }
+            }
+            if (solve(currentGrid)) {
+                for (let i = 0; i < 9; i++) {
+                    for (let j = 0; j < 9; j++) {
+                        inputs[i * 9 + j].value = currentGrid[i][j];
+                    }
+                }
+            } else {
+                alert('No solution found!');
+            }
+        }
+
+        function isValid(grid, row, col, num) {
+            for (let x = 0; x < 9; x++) {
+                if (grid[row][x] === num || grid[x][col] === num) {
+                    return false;
+                }
+                const startRow = 3 * Math.floor(row / 3);
+                const startCol = 3 * Math.floor(col / 3);
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        if (grid[startRow + i][startCol + j] === num) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        function solve(grid) {
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 9; col++) {
+                    if (grid[row][col] === 0) {
+                        for (let num = 1; num <= 9; num++) {
+                            if (isValid(grid, row, col, num)) {
+                                grid[row][col] = num;
+                                if (solve(grid)) {
+                                    return true;
+                                }
+                                grid[row][col] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        window.onload = createGrid;
+    </script>
+</body>
+</html>
